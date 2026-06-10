@@ -16,15 +16,13 @@ jobs:
       - name: Checkout Bloons
         uses: actions/checkout@v4
         with:
-          repository: ${{ secrets.BLOONS_REPO }}
-          token: ${{ secrets.GH_PAT }}
+          repository: roger765/Monkey-Bloons-Tower-Defence
           path: _games/bloons
 
       - name: Checkout Unleashed
         uses: actions/checkout@v4
         with:
-          repository: ${{ secrets.UNLEASHED_REPO }}
-          token: ${{ secrets.GH_PAT }}
+          repository: roger765/Unleashed
           path: _games/unleashed
 
       - uses: actions/setup-node@v4
