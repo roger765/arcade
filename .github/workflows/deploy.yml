@@ -1,0 +1,60 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout arcade
+        uses: actions/checkout@v4
+
+      - name: Checkout Bloons
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.BLOONS_REPO }}
+          token: ${{ secrets.GH_PAT }}
+          path: _games/bloons
+
+      - name: Checkout Unleashed
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.UNLEASHED_REPO }}
+          token: ${{ secrets.GH_PAT }}
+          path: _games/unleashed
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build Bloons
+        working-directory: _games/bloons
+        run: npm ci && npm run build
+
+      - name: Build Unleashed
+        working-directory: _games/unleashed
+        run: npm ci && npm run build
+        env:
+          VITE_WS_URL: ${{ secrets.UNLEASHED_WS_URL }}
+
+      - name: Assemble dist
+        run: |
+          mkdir -p dist/bloons dist/unleashed
+          cp -r _games/bloons/dist/. dist/bloons/
+          cp -r _games/unleashed/dist/. dist/unleashed/
+          cp index.html dist/index.html
+          cp netlify.toml dist/netlify.toml
+
+      - name: Deploy to Netlify
+        uses: nwtgck/actions-netlify@v3
+        with:
+          publish-dir: dist
+          production-deploy: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
