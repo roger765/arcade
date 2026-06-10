@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/bloons", "destination": "/bloons/index.html" },
+    { "source": "/bloons/(.*)", "destination": "/bloons/index.html" },
+    { "source": "/unleashed", "destination": "/unleashed/index.html" },
+    { "source": "/unleashed/(.*)", "destination": "/unleashed/index.html" }
+  ]
+}

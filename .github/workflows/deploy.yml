@@ -45,14 +45,13 @@ jobs:
           cp -r _games/bloons/dist/. dist/bloons/
           cp -r _games/unleashed/dist/. dist/unleashed/
           cp index.html dist/index.html
-          cp netlify.toml dist/netlify.toml
+          cp vercel.json dist/vercel.json
 
-      - name: Deploy to Netlify
-        uses: nwtgck/actions-netlify@v3
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
         with:
-          publish-dir: dist
-          production-deploy: true
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: dist
+          vercel-args: '--prod'
