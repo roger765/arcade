@@ -41,10 +41,11 @@ jobs:
 
       - name: Assemble dist
         run: |
-          mkdir -p dist/bloons dist/unleashed
+          mkdir -p dist/bloons dist/unleashed dist/toybox
           cp -r _games/bloons/dist/. dist/bloons/
           cp -r _games/unleashed/dist/. dist/unleashed/
           cp index.html dist/index.html
+          cp -r toybox/. dist/toybox/
           cp vercel.json dist/vercel.json
 
       - name: Deploy to Vercel
