@@ -264,7 +264,7 @@ const WARRIORS = [
   { id: "sockpup", name: "Sock Puppet", type: "Speedster", rarity: "epic", element: "fire", hp: 7, dmg: 1, special: "SPARK SOCK", does: "Throws a sparky sock. The enemy can't see for 2 seconds.", fx: { range: 260, blind: 2 }, boosts: [{ stat: "dmg", amt: 3, vs: "earth" }, { stat: "spd", amt: 3, vs: "water" }] },
   { id: "boombug", name: "Boom Bug", type: "Speedster", rarity: "legendary", element: "fire", bomb: true, hp: 1, dmg: 20, special: "BIG BANG", does: "Can't be blocked. Stuns for 2 seconds.", fx: { unblock: 1, stun: 2 } },
   { id: "quizowl", name: "Quiz Owl", type: "Brawler", rarity: "special", element: "light", quest: "elemquiz", hp: 7, dmg: 5, special: "HOOT BLAST", does: "A booming hoot from far away. Flips the enemy's controls for 3 seconds.", fx: { range: 300, reverse: 3 } },
-  { id: "stormhawk", name: "Stormhawk", type: "Speedster", rarity: "special", element: "lightning", quest: "thunder", hp: 6, dmg: 7, special: "THUNDER DIVE", does: "Swoops in. Can't be blocked. 1 extra Damage.", fx: { unblock: 1, dash: 1, extra: 1 } },
+  { id: "thunderhawk", name: "Thunderhawk", type: "Speedster", rarity: "special", element: "lightning", quest: "thunder", hp: 6, dmg: 7, special: "THUNDER DIVE", does: "Swoops in. Can't be blocked. 1 extra Damage.", fx: { unblock: 1, dash: 1, extra: 1 } },
   { id: "labbull", name: "Labyrinth Bull", type: "Smasher", rarity: "special", element: "earth", quest: "speedmaze", hp: 9, dmg: 4, special: "HORN CHARGE", does: "Charges in. Stuns for 2 seconds.", fx: { dash: 1, stun: 2 } },
   { id: "mirrorimp", name: "Mirror Imp", type: "Speedster", rarity: "special", element: "shadow", quest: "mirror", hp: 6, dmg: 6, special: "COPYCAT", does: "Double Damage.", fx: { mult: 2 } },
   { id: "goliath", name: "Granite Goliath", type: "Smasher", rarity: "giant", element: "earth", giant: "arena", armor: 70, hp: 17, dmg: 3, special: "AVALANCHE CRUSH", does: "Long reach. Stuns for 3 seconds. 1 extra Damage.", fx: { range: 200, stun: 3, extra: 1 } },
@@ -414,7 +414,7 @@ const FIGS = {
   sockpup: { body: "#e86a4a", armor: "#fff0c8", dark: "#7a2a18", eye: "#2a1a10", wide: 0.95, extra: "" },
   boombug: { body: "#2a2a3c", armor: "#ff4d4d", dark: "#0e0c18", eye: "#ffe14d", wide: 0.95, extra: "" },
   quizowl: { body: "#8a6a4a", armor: "#fff0c8", dark: "#4a3622", eye: "#ffe14d", wide: 1.0, extra: "" },
-  stormhawk: { body: "#3a4a7a", armor: "#ffe14d", dark: "#1a2240", eye: "#fff36b", wide: 0.9, extra: "" },
+  thunderhawk: { body: "#3a4a7a", armor: "#ffe14d", dark: "#1a2240", eye: "#fff36b", wide: 0.9, extra: "" },
   labbull: { body: "#8a5a3a", armor: "#d8b060", dark: "#4a2a16", eye: "#ff4d4d", wide: 1.3, extra: "" },
   mirrorimp: { body: "#b8c4dc", armor: "#ffffff", dark: "#5a6684", eye: "#ff5ad8", wide: 0.9, extra: "" }
 };
@@ -666,7 +666,7 @@ const DESIGN = {
   sockpup: { head: "dog", body: "slim", arms: "stubby", legs: "legs", tail: "feather", deco: ["stitches"] },
   boombug: { head: "bug", body: "orb", arms: "stubby", legs: "legs", tail: "flame" },
   quizowl: { head: "bird", body: "pear", arms: "stubby", legs: "legs", tail: "feather" },
-  stormhawk: { head: "bird", body: "slim", arms: "claws", legs: "legs", tail: "bolt" },
+  thunderhawk: { head: "bird", body: "slim", arms: "claws", legs: "legs", tail: "bolt" },
   labbull: { head: "ox", body: "barrel", arms: "fists", legs: "stumps" },
   mirrorimp: { head: "cat", body: "slim", arms: "arms", legs: "legs", tail: "fox" }
 };
@@ -944,7 +944,7 @@ function advScreen(filter = "all") {
       <div>${a.coins ? `<span class="rw">+${a.coins} coins</span>` : ""}${w ? `<span class="rw w">★ ${w.name}</span>` : ""}${!a.coins && !w ? `<span class="rw f">${a.silly ? "Just for silly fun" : "Just for fun"}</span>` : ""}</div>
       ${a.stat && !got ? `<div class="adp"><i style="width:${prog / a.goal * 100}%"></i></div><small>${prog} / ${a.goal}</small>` : ""}</div></div>`;
   };
-  overlay(`<div class="topbar"><button class="btn" id="ok">Back to the shop</button></div>
+  overlay(`<div class="topbar"><button class="btn" id="ok">Back to the market</button></div>
     <h2>\u{1F3C6} Advancements</h2>
     <p class="sub">${done} of ${ADV.length} earned. Some give coins, some give special warriors, and some are just for fun (and silly)!</p>
     <div class="adbar"><i style="width:${done / ADV.length * 100}%"></i></div>
@@ -1073,6 +1073,7 @@ addEventListener("keydown", e => {
   down.add(k);
   if (ov.hidden && ["arrowup", "arrowdown", "arrowleft", "arrowright", " "].includes(k)) e.preventDefault();
   if (k === "escape" && scene === "fight") quitFight();
+  else if (k === "escape" && scene === "market" && ov.hidden) shopMenu();
   else if (k === "escape" && scene === "quest") { Q = null; scene = "menu"; Sound.music(null); questScreen(); }
 });
 addEventListener("keyup", e => down.delete(e.key.toLowerCase()));
@@ -1100,7 +1101,8 @@ resize();
 let scene = "title";
 function overlay(html) { ov.classList.remove("lite"); ov.innerHTML = html; ov.hidden = false; scene = scene === "fight" ? "fight" : "menu"; const b = ov.querySelector("button:not(:disabled)"); if (b) b.focus(); }
 function closeOverlay() { ov.hidden = true; ov.innerHTML = ""; cv.focus(); }
-function toShop(note) { setKeys(""); shopScreen(note); Sound.music("shop"); }
+function shopMenu(note) { setKeys(""); shopScreen(note); Sound.music("shop"); }
+function toShop() { enterMarket(); }
 let keysMode = "";
 // The on-screen box that listed the keys has been removed. M (sound) and F (full screen) still work from the keyboard.
 function setKeys(mode) { keysMode = mode; }
@@ -1181,7 +1183,7 @@ function shopScreen(note = "") {
       <button class="door quest" id="quests" style="--dc:var(--special)"><span class="qi">\u{1F5FA}\uFE0F</span><b>SIDE QUESTS</b><span>${Object.keys(save.quests).length}/${QUESTS.length} done · win special warriors</span></button>
       ${Object.entries(DISKS).map(([k, d]) => `<button class="door" data-disk="${k}" style="--dc:${d.color}"><i class="mini-disk"></i><b>${d.name.toUpperCase()}</b><span>${d.price} coins · ${Object.entries(d.odds).filter(([, n]) => n).map(([r, n]) => `${r} ${n}%`).join(", ")}${d.rank ? (RANKS.indexOf(d.rank) > rankIdx() ? `<br>\u{1F512} needs ${d.rank} rank` : "") : d.odds.giant ? "" : "<br>up to your rank"}</span></button>`).join("")}
     </div>
-    <div class="row"><button class="btn alt" id="team">Team bench (${save.team.length}/${teamCap(save.team)})</button><button class="btn alt" id="elems">Elements guide</button><button class="btn alt" id="advb">\u{1F3C6} Advancements (${ADV.filter(a => save.adv[a.id]).length}/${ADV.length})</button></div>
+    <div class="row"><button class="btn alt" id="mkt">\u{1F6B6} Back to the market</button><button class="btn alt" id="team">Team bench (${save.team.length}/${teamCap(save.team)})</button><button class="btn alt" id="elems">Elements guide</button><button class="btn alt" id="advb">\u{1F3C6} Advancements (${ADV.filter(a => save.adv[a.id]).length}/${ADV.length})</button></div>
     <p class="sub note">${note}</p>
     <input id="wsearch" class="wsearch" type="search" placeholder="Search warriors: name, element, type, rarity, owned, locked" autocomplete="off" aria-label="Search warriors" value="${shopQuery.replace(/"/g, "&quot;")}">
     ${boostFilterHTML()}
@@ -1197,6 +1199,7 @@ function shopScreen(note = "") {
   applyShopSearch();
   ov.scrollTop = y;
   document.getElementById("arena").onclick = arenaScreen;
+  document.getElementById("mkt").onclick = () => toShop();
   document.getElementById("team").onclick = () => teamScreen();
   document.getElementById("elems").onclick = elementsScreen;
   document.getElementById("advb").onclick = () => advScreen();
@@ -1218,7 +1221,7 @@ function buy(w) {
   if (!teamRule(save.team, w.id)) save.team.push(w.id);
   persist(); Sound.coin();
   overlay(`<h2>You bought ${w.name}!</h2>${cardHTML(w, "big reveal")}<button class="btn" id="ok">Back to the shop</button>`);
-  document.getElementById("ok").onclick = () => toShop();
+  document.getElementById("ok").onclick = () => shopMenu();
 }
 // What shows on the game screen behind the menus.
 // The moving picture behind the menus: a drifting checker floor, floating element sparks and a parade of warriors.
@@ -1256,7 +1259,7 @@ function elementsScreen() {
       <span><strong>${e.perk}:</strong> ${e.does}</span></div>`).join("")}</div>
     <h2 style="font-size:clamp(16px,2.6vw,26px);color:var(--legend)">Boosts</h2>
     <p class="sub">Every warrior also has 1 or 2 random boosts, shown on its card: up to +3 against an element. A Damage boost, a Speed boost, or a Resistance boost (a warrior's two boosts are against different elements). A Damage boost takes extra Health off a warrior of that element when you defeat it. A Speed boost (pink) makes you walk faster for as long as you face a warrior of that element: each +1 is 8% faster. A Resistance boost (blue) means a warrior of that element takes that much less Health off you when it defeats you, but never below 1. Boosts are picked at random once, when you start a new game, and then never change.</p>
-    <button class="btn" id="ok">Back to the shop</button>`);
+    <button class="btn" id="ok">Back to the market</button>`);
   document.getElementById("ok").onclick = () => toShop();
 }
 
@@ -1290,8 +1293,8 @@ function openDisk(kind = "basic") {
     stage.insertAdjacentHTML("beforeend", `<div class="burst"></div>${cardHTML(w, "big reveal")}`);
     const m = document.getElementById("dmsg");
     m.outerHTML = `<div class="toast" style="color:${dupe ? "#ff4d6a" : RARITY_COLOR[rarity]}">${dupe ? "Already got it. Too bad!" : `NEW ${rarity.toUpperCase()} WARRIOR!`}</div>
-      <div class="row"><button class="btn" id="ok">Back to the shop</button>${save.coins >= d.price ? `<button class="btn alt" id="again">Open another (${d.price})</button>` : ""}</div>`;
-    document.getElementById("ok").onclick = () => toShop();
+      <div class="row"><button class="btn" id="ok">Back to the disk stall</button>${save.coins >= d.price ? `<button class="btn alt" id="again">Open another (${d.price})</button>` : ""}</div>`;
+    document.getElementById("ok").onclick = () => diskStall();
     const a = document.getElementById("again");
     if (a) a.onclick = () => { save.coins -= d.price; persist(); openDisk(kind); };
     document.getElementById("ok").focus();
@@ -1414,7 +1417,7 @@ function arenaScreen() {
       <button class="btn alt" id="tut">Tutorial<br><small>learn to fight</small></button>
       <button class="btn alt" disabled>Online<br><small>coming soon</small></button>
     </div>
-    <button class="btn alt" id="back">Back to the shop</button>`);
+    <button class="btn alt" id="back">Back to the market</button>`);
   document.getElementById("cpu").onclick = () => previewFight(cpuTeam(lv, save.team.length), { mode: "cpu", level: lv }, arenaScreen);
   document.getElementById("two").onclick = () => twoPlayerPick([], 1);
   document.getElementById("giant").onclick = () => giantHuntScreen();
@@ -1881,6 +1884,7 @@ function results() {
   fightEnd(F.winner === 0);
   if (F.opts.mode === "tutorial") return tutorialResults();
   if (F.opts.mode === "quest") return questFightResults();
+  if (F.opts.mode === "street") return streetResults();
   if (F.opts.mode === "giant") return giantResults();
   const cpu = F.opts.mode === "cpu";
   let title, sub = "", earned = 0;
@@ -1897,7 +1901,7 @@ function results() {
   overlay(`<h1 style="font-size:clamp(30px,6vw,64px)">${title}</h1>
     ${cpu ? `<div class="toast" style="color:#ffc93c">+${earned} coins</div>` : ""}
     <p class="sub">${sub}</p>
-    <div class="row"><button class="btn" id="ok">Back to the shop</button><button class="btn alt" id="again">Fight again</button></div>`);
+    <div class="row"><button class="btn" id="ok">Back to the market</button><button class="btn alt" id="again">Fight again</button></div>`);
   document.getElementById("ok").onclick = () => toShop();
   document.getElementById("again").onclick = () => cpu ? previewFight(cpuTeam(cpuLevel(), save.team.length), { mode: "cpu", level: cpuLevel() }, arenaScreen)
     : startFight(F.teams[0].map(f => f.w.id), F.teams[1].map(f => f.w.id), { mode: "2p" });
@@ -2306,7 +2310,7 @@ function giantResults() {
   save.coins += coins; persist(); Sound.win(); confetti(["#ff8a3c", "#ffffff", "#ffc93c"], 220);
   overlay(`<h1 style="font-size:clamp(28px,5vw,56px)">GIANT DEFEATED!</h1><div class="toast" style="color:#ffc93c">+${coins} coins</div>
     ${first ? `<div class="toast" style="color:#ff8a3c">NEW GIANT WARRIOR!</div>${cardHTML(w, "big reveal")}` : ""}
-    <div class="row"><button class="btn" id="ok">Back to the Giant Hunt</button><button class="btn alt" id="shop">Back to the shop</button></div>`);
+    <div class="row"><button class="btn" id="ok">Back to the Giant Hunt</button><button class="btn alt" id="shop">Back to the market</button></div>`);
   document.getElementById("ok").onclick = () => { Sound.music("shop"); giantHuntScreen(); };
   document.getElementById("shop").onclick = () => toShop();
 }
@@ -2330,7 +2334,7 @@ const QUESTS = [
   { id: "speed", icon: "⏱️", name: "Speed Brawl", kind: "FIGHT", desc: "Beat all your opponents in 90 seconds or less.", reward: { coins: 70 } },
   { id: "elemquiz", icon: "\u{1F52E}", name: "Element Quiz", kind: "PUZZLE", desc: "Five questions about the six elements. Do you know your perks?", reward: { coins: 60, warrior: "quizowl" } },
   { id: "trivia", icon: "\u{1F9E0}", name: "Toy Trivia", kind: "PUZZLE", desc: "Five quick questions about animals, space and the world.", reward: { coins: 50 } },
-  { id: "thunder", icon: "\u{1F329}️", name: "Thunder Run", kind: "SURVIVE", desc: "The big storm! Dodge the lightning for 40 seconds. Only 2 lives, and it's faster.", reward: { coins: 90, warrior: "stormhawk" } },
+  { id: "thunder", icon: "\u{1F329}️", name: "Thunder Run", kind: "SURVIVE", desc: "The big storm! Dodge the lightning for 40 seconds. Only 2 lives, and it's faster.", reward: { coins: 90, warrior: "thunderhawk" } },
   { id: "speedmaze", icon: "\u{1F3C3}", name: "Speed Maze", kind: "MAZE", desc: "A new maze and only 50 seconds. Find the key and run for the exit!", reward: { coins: 90, warrior: "labbull" } },
   { id: "mirror", icon: "\u{1FA9E}", name: "Mirror Match", kind: "FIGHT", desc: "You fight a copy of your own team! Know your warriors and beat yourself.", reward: { coins: 90, warrior: "mirrorimp" } },
   { id: "firewalk", icon: "\u{1F525}", name: "Fire Walk", kind: "FIGHT", desc: "Three fire warriors in a row. Bring water or earth!", reward: { coins: 80 } },
@@ -2347,7 +2351,7 @@ function questScreen(note = "") {
     <p class="sub note">${note}</p>
     <div class="doors">${QUESTS.map(q => { const d = save.quests[q.id], w = q.reward.warrior && BY_ID[q.reward.warrior];
       return `<button class="door quest" data-q="${q.id}" style="--dc:${d ? "#9be22d" : "#ff5ad8"}"><span class="qi">${q.icon}</span><b>${q.name}</b><small class="qk">${q.kind}${d ? " · DONE" : ""}</small><span>${q.desc}</span><span class="qr">${d ? "Replay: 10 coins" : `Reward: ${q.reward.coins} coins${w ? ` + ${w.name}` : ""}`}</span></button>`; }).join("")}</div>
-    <button class="btn alt" id="back">Back to the shop</button>`);
+    <button class="btn alt" id="back">Back to the market</button>`);
   ov.querySelectorAll("[data-q]").forEach(b => b.onclick = () => startQuest(b.dataset.q));
   document.getElementById("back").onclick = () => toShop();
 }
@@ -2396,7 +2400,7 @@ function finishQuest(id) {
   confetti(w ? ["#ff5ad8", "#ffffff", "#ffc93c"] : undefined, w ? 200 : 120);
   overlay(`<h1 style="font-size:clamp(28px,5vw,56px)">QUEST COMPLETE!</h1><div class="toast" style="color:#ffc93c">+${coins} coins</div>
     ${w ? `<div class="toast" style="color:var(--special)">NEW SPECIAL WARRIOR!</div>${cardHTML(w, "big reveal")}` : ""}
-    <div class="row"><button class="btn" id="ok">More quests</button><button class="btn alt" id="shop">Back to the shop</button></div>`);
+    <div class="row"><button class="btn" id="ok">More quests</button><button class="btn alt" id="shop">Back to the market</button></div>`);
   document.getElementById("ok").onclick = () => { Sound.music("shop"); questScreen(); };
   document.getElementById("shop").onclick = () => toShop();
 }
@@ -2797,6 +2801,140 @@ function drawDash() {
   }
 }
 
+
+// ===================== THE MARKET =====================
+// The shop is now a market street you can walk around in with your lead warrior (WASD or the arrow keys).
+// Walk up to a stall and press E to use it. Street brawlers wander about: walk up and press E to challenge one.
+let Mk = null;
+const MK_STALLS = [
+  { id: "warriors", icon: "\u{1F9F8}", name: "WARRIOR STALL", c1: "#ff6a3d", c2: "#ffe2c8", row: 0, go: () => shopScreen() },
+  { id: "disks", icon: "\u{1F4BF}", name: "DISK STALL", c1: "#b45cff", c2: "#f0dcff", row: 0, go: () => diskStall() },
+  { id: "quests", icon: "\u{1F5FA}️", name: "QUEST BOARD", c1: "#ff5ad8", c2: "#ffe0f6", row: 0, go: () => questScreen() },
+  { id: "arena", icon: "\u{1F3DF}️", name: "ARENA GATE", c1: "#ff4d6a", c2: "#ffd8de", row: 0, go: () => arenaScreen() },
+  { id: "team", icon: "\u{1F465}", name: "TEAM TENT", c1: "#2fd3ff", c2: "#d6f6ff", row: 1, go: () => teamScreen() },
+  { id: "trophies", icon: "\u{1F3C6}", name: "TROPHY STAND", c1: "#ffc93c", c2: "#fff0c0", row: 1, go: () => advScreen() },
+  { id: "elements", icon: "\u{1F4D6}", name: "ELEMENT LIBRARY", c1: "#9be22d", c2: "#e8ffc0", row: 1, go: () => elementsScreen() }
+];
+function stallRect(s) {
+  const same = MK_STALLS.filter(t => t.row === s.row), i = same.indexOf(s), sp = (W - 80) / same.length, w = Math.min(190, sp - 26);
+  return { x: 40 + sp * (i + 0.5) - w / 2, y: s.row ? 428 : 92, w, h: s.row ? 82 : 78, cx: 40 + sp * (i + 0.5) };
+}
+function diskStall() {
+  overlay(`<h2>\u{1F4BF} Disk Stall</h2><p class="sub">${rankLine()}</p><p class="sub note"></p>
+    <div class="doors">${Object.entries(DISKS).map(([k, d]) => `<button class="door" data-disk="${k}" style="--dc:${d.color}"><i class="mini-disk"></i><b>${d.name.toUpperCase()}</b><span>${d.price} coins · ${Object.entries(d.odds).filter(([, n]) => n).map(([r, n]) => `${r} ${n}%`).join(", ")}${d.rank ? (RANKS.indexOf(d.rank) > rankIdx() ? `<br>\u{1F512} needs ${d.rank} rank` : "") : d.odds.giant ? "" : "<br>up to your rank"}</span></button>`).join("")}</div>
+    <p class="sub"><span class="coinchip"></span> ${save.coins} coins</p>
+    <button class="btn alt" id="back">Back to the market</button>`);
+  ov.querySelectorAll("[data-disk]").forEach(b => b.onclick = () => buyDisk(b.dataset.disk));
+  document.getElementById("back").onclick = () => toShop();
+}
+function newNpcs() {
+  const lv = cpuLevel(), ids = cpuTeam(lv, 5), out = [];
+  ids.forEach((id, i) => out.push({ id, x: 110 + i * ((W - 220) / 4), y: 285 + (i % 3) * 42, dir: i % 2 ? 1 : -1, sp: 0.25 + (i % 3) * 0.12, cool: 0 }));
+  return out;
+}
+function enterMarket() {
+  if (!Mk) Mk = { x: W / 2, y: 330, face: 1, npcs: newNpcs(), pops: [], near: null, t: 0 };
+  closeOverlay(); F = null; Q = null; scene = "market"; setKeys("quest"); Sound.music("shop");
+}
+function marketTargets() {
+  const out = [];
+  MK_STALLS.forEach(s => { const r = stallRect(s); out.push({ kind: "stall", s, x: r.cx, y: s.row ? 418 : 176, d: 1e9 }); });
+  Mk.npcs.forEach((n, i) => out.push({ kind: "npc", n, i, x: n.x, y: n.y, d: 1e9 }));
+  return out;
+}
+function updateMarket() {
+  const lead = BY_ID[save.team[0] || save.owned[0]], [vx, vy] = moveVec(TYPE_STATS[lead.type].spd * 1.2);
+  Mk.t++; if (vx) Mk.face = vx > 0 ? 1 : -1;
+  Mk.x += vx; Mk.y += vy;
+  Mk.x = Math.max(50, Math.min(W - 50, Mk.x)); Mk.y = Math.max(232, Math.min(404, Mk.y));
+  const fx = W / 2, fy = 318, dx = Mk.x - fx, dy = (Mk.y - fy) * 1.5, dd = Math.hypot(dx, dy);   // the fountain is in the way
+  if (dd < 62) { const k = 62 / (dd || 1); Mk.x = fx + dx * k; Mk.y = fy + dy * k / 1.5; }
+  for (const n of Mk.npcs) {
+    if (n.cool > 0) n.cool--;
+    if (Math.hypot(n.x - Mk.x, n.y - Mk.y) < 120) continue;   // they stop to look at you
+    n.x += n.dir * n.sp; if (n.x < 70 || n.x > W - 70) n.dir *= -1;
+  }
+  let best = null;
+  for (const t of marketTargets()) {   // a brawler beside you wins over a stall
+    let d;
+    if (t.kind === "npc") { d = Math.hypot(t.x - Mk.x, (t.y - Mk.y) * 1.1); if (d >= 95) continue; d -= 1000; }
+    else { const ok = t.s.row ? Mk.y > 366 : Mk.y < 276; if (!ok || Math.abs(t.x - Mk.x) > 105) continue; d = Math.abs(t.x - Mk.x); }
+    if (!best || d < best.d) { t.d = d; best = t; }
+  }
+  Mk.near = best;
+  if (best && (pressed.has("e") || pressed.has(" ") || pressed.has("enter"))) {
+    Sound.coin();
+    if (best.kind === "stall") best.s.go();
+    else if (best.n.cool > 0) { Sound.buzz(); Mk.pops.push({ text: "THEY'RE RESTING", x: best.n.x, y: best.n.y - 150, c: "#a59fc4", t: 0 }); }
+    else streetBrawl(best.i);
+  }
+  Mk.pops.forEach(p => p.t++); Mk.pops = Mk.pops.filter(p => p.t < 70);
+}
+function streetBrawl(i) {
+  const lv = cpuLevel(), n = Mk.npcs[i], enemy = lv >= 3 ? cpuTeam(lv, 2) : [n.id];
+  if (lv >= 3) enemy[0] = n.id;
+  overlay(`<h1 style="font-size:clamp(26px,5vw,54px)">\u{1F94A} Street Brawl!</h1><p class="sub">A street brawler wants a fight. Win for ${12 + lv * 4}+ coins. Streets are rough, so there are no rank points.</p>
+    <div class="row"><button class="btn" id="go">Fight!</button><button class="btn alt" id="no">Walk away</button></div>`);
+  document.getElementById("go").onclick = () => previewFight(enemy, { mode: "street", level: Math.max(1, lv), npc: i }, () => toShop());
+  document.getElementById("no").onclick = () => toShop();
+}
+function streetResults() {
+  const won = F.winner === 0, lv = F.opts.level || 1, npc = Mk && Mk.npcs[F.opts.npc];
+  let earned = 0;
+  if (won) { earned = 12 + lv * 4 + F.kos[0] * 3; save.coins += earned; if (npc) npc.cool = 60 * 120; persist(); Sound.win(); confetti(); } else Sound.lose();
+  Sound.music(null); scene = "menu";
+  overlay(`<h1 style="font-size:clamp(30px,6vw,64px)">${won ? "YOU WON THE BRAWL!" : F.winner < 0 ? "DRAW!" : "YOU LOST THE BRAWL"}</h1>
+    ${won ? `<div class="toast" style="color:#ffc93c">+${earned} coins</div>` : ""}<p class="sub">${won ? "The brawler needs a rest. Go find another one!" : "Try another team order, or come back stronger."}</p>
+    <div class="row"><button class="btn" id="ok">Back to the market</button></div>`);
+  document.getElementById("ok").onclick = () => toShop();
+}
+function mkRound(x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+function drawStall(s) {
+  const r = stallRect(s), top = s.row === 0;
+  ctx.fillStyle = "#00000055"; ctx.fillRect(r.x + 6, r.y + r.h - 4, r.w, 10);
+  ctx.fillStyle = "#4a3a62"; mkRound(r.x, r.y + 26, r.w, r.h - 26, 8); ctx.fill();   // counter
+  ctx.fillStyle = "#6a5488"; ctx.fillRect(r.x + 6, r.y + 46, r.w - 12, 8);
+  const sw = r.w / 8;   // striped awning
+  for (let i = 0; i < 8; i++) { ctx.fillStyle = i % 2 ? s.c2 : s.c1; ctx.beginPath(); ctx.moveTo(r.x + i * sw, r.y); ctx.lineTo(r.x + (i + 1) * sw, r.y); ctx.lineTo(r.x + (i + 1) * sw + 4, r.y + 30); ctx.arc(r.x + (i + 0.5) * sw + 2, r.y + 30, sw / 2, 0, Math.PI); ctx.closePath(); ctx.fill(); }
+  ctx.font = "34px sans-serif"; ctx.textAlign = "center"; ctx.fillStyle = "#fff"; ctx.fillText(s.icon, r.cx, r.y + r.h - 14);
+  ctx.font = "800 13px Nunito, sans-serif"; ctx.fillStyle = "#fff"; ctx.fillText(s.name, r.cx, top ? r.y + r.h + 17 : r.y - 8);
+}
+function drawMarket() {
+  const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#241d3e"); g.addColorStop(1, "#33284f"); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = "#ffffff12"; ctx.lineWidth = 1;   // cobbles
+  for (let y = 190; y < 420; y += 24) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); for (let x = ((y / 24) % 2) * 30; x < W; x += 60) { ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + 24); ctx.stroke(); } }
+  ctx.fillStyle = "#3d3260"; ctx.fillRect(0, 186, W, 4); ctx.fillRect(0, 420, W, 4);
+  // bunting
+  for (let i = 0; i < 12; i++) { const x = 20 + i * ((W - 40) / 11), c = ["#ff4d6a", "#ffc93c", "#2fd3ff", "#9be22d", "#b45cff"][i % 5]; ctx.fillStyle = c; ctx.beginPath(); ctx.moveTo(x - 12, 74); ctx.lineTo(x + 12, 74); ctx.lineTo(x, 96 + Math.sin(Mk.t / 25 + i) * 2); ctx.fill(); }
+  ctx.strokeStyle = "#ffffff55"; ctx.beginPath(); ctx.moveTo(0, 74); ctx.lineTo(W, 74); ctx.stroke();
+  MK_STALLS.filter(s => s.row === 0).forEach(drawStall);
+  // fountain
+  const fx = W / 2, fy = 318; ctx.fillStyle = "#00000044"; ctx.beginPath(); ctx.ellipse(fx, fy + 22, 64, 20, 0, 0, 7); ctx.fill();
+  ctx.fillStyle = "#6a6a8a"; ctx.beginPath(); ctx.ellipse(fx, fy + 10, 58, 22, 0, 0, 7); ctx.fill(); ctx.fillStyle = "#3a9ad8"; ctx.beginPath(); ctx.ellipse(fx, fy + 8, 48, 16, 0, 0, 7); ctx.fill();
+  ctx.fillStyle = "#8a8aaa"; ctx.fillRect(fx - 7, fy - 26, 14, 36); ctx.fillStyle = "#bfe8ff"; for (let i = 0; i < 5; i++) { const a = Mk.t / 10 + i * 1.3; ctx.beginPath(); ctx.arc(fx + Math.sin(a) * 16, fy - 28 + Math.abs(Math.sin(a * 1.7)) * -10, 4, 0, 7); ctx.fill(); }
+  // lamps
+  [[60, 300], [W - 60, 300]].forEach(([x, y]) => { ctx.fillStyle = "#2a2440"; ctx.fillRect(x - 4, y - 90, 8, 96); ctx.fillStyle = "#ffe9a8"; ctx.beginPath(); ctx.arc(x, y - 96, 11, 0, 7); ctx.fill(); ctx.fillStyle = "#ffe9a833"; ctx.beginPath(); ctx.arc(x, y - 96, 28, 0, 7); ctx.fill(); });
+  // people and warriors, back to front
+  const lead = BY_ID[save.team[0] || save.owned[0]], st = TYPE_STATS[lead.type];
+  const ents = Mk.npcs.map(n => ({ y: n.y, n })).concat([{ y: Mk.y, me: true }]).sort((a, b) => a.y - b.y);
+  for (const e of ents) {
+    if (e.me) { const size = st.size * 0.56; ctx.fillStyle = "#0007"; ctx.beginPath(); ctx.ellipse(Mk.x, Mk.y + 4, size * 0.35, 9, 0, 0, 7); ctx.fill(); drawFig(ctx, lead.id, Mk.x, Mk.y + Math.sin(Mk.t / 8) * (Mk.moving ? 2 : 0), size, Mk.face, 1); ctx.fillStyle = "#fff"; ctx.font = "800 13px Nunito, sans-serif"; ctx.textAlign = "center"; ctx.fillText("YOU", Mk.x, Mk.y - size * 1.4); }
+    else { const n = e.n, w = BY_ID[n.id], size = TYPE_STATS[w.type].size * 0.56; ctx.fillStyle = "#0007"; ctx.beginPath(); ctx.ellipse(n.x, n.y + 4, size * 0.35, 9, 0, 0, 7); ctx.fill();
+      drawFig(ctx, n.id, n.x, n.y, size, n.dir, n.cool > 0 ? 0.55 : 1);
+      ctx.textAlign = "center"; ctx.font = "800 13px Nunito, sans-serif"; ctx.fillStyle = n.cool > 0 ? "#a59fc4" : "#ffb3c0"; ctx.fillText(n.cool > 0 ? "zzz resting" : "⚔️ Brawler!", n.x, n.y - size * 1.4); }
+  }
+  MK_STALLS.filter(s => s.row === 1).forEach(drawStall);
+  // top bar and prompt
+  ctx.fillStyle = "#120f1fcc"; mkRound(20, 12, W - 40, 50, 12); ctx.fill();
+  ctx.textAlign = "left"; ctx.font = "22px Bungee, sans-serif"; ctx.fillStyle = "#ffc93c"; ctx.fillText("BRAWL MART", 40, 46);
+  ctx.textAlign = "right"; ctx.font = "800 18px Nunito, sans-serif"; ctx.fillStyle = "#fff"; ctx.fillText(`${save.coins} coins  ·  Rank ${rankName(rankIdx())}`, W - 40, 44);
+  ctx.textAlign = "center"; ctx.font = "800 16px Nunito, sans-serif"; ctx.fillStyle = "#a59fc4"; ctx.fillText("WASD or arrows to walk  ·  E to use a stall or brawl  ·  Esc for the shop menu", W / 2, H - 8);
+  if (Mk.near) { const t = Mk.near, label = t.kind === "stall" ? t.s.name : (t.n.cool > 0 ? "Resting..." : "STREET BRAWL"); ctx.textAlign = "center"; ctx.fillStyle = "#ffe14d"; ctx.font = "800 22px Nunito, sans-serif"; ctx.fillText(`PRESS E  \u00B7  ${label}`, W / 2, 44); }
+  ctx.font = "22px Bungee, Impact, sans-serif"; ctx.lineWidth = 5;
+  for (const p of Mk.pops) { ctx.globalAlpha = Math.max(0, 1 - p.t / 70); ctx.strokeStyle = "#000"; ctx.strokeText(p.text, p.x, p.y - p.t * 0.6); ctx.fillStyle = p.c; ctx.fillText(p.text, p.x, p.y - p.t * 0.6); }
+  ctx.globalAlpha = 1;
+}
+
 // ===================== LOOP =====================
 let frame = 0, last = performance.now(), acc = 0;
 function loop(now) {
@@ -2806,11 +2944,13 @@ function loop(now) {
       acc -= 1000 / 60; frame++;
       if (scene === "fight" && F && ov.hidden) updateFight();
       else if (scene === "quest" && Q && ov.hidden) updateQuest();
+      else if (scene === "market" && Mk && ov.hidden) updateMarket();
       pressed.clear();
     }
     ctx.clearRect(0, 0, W, H);
     if (scene === "fight" && F) drawFight();
     else if (scene === "quest" && Q) drawQuest();
+    else if (scene === "market" && Mk) drawMarket();
     else drawBackdrop();
   } catch (e) { console.error(e); acc = 0; }   // an error in one frame is reported, but never stops the game
   requestAnimationFrame(loop);
