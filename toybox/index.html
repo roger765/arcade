@@ -263,6 +263,11 @@ const WARRIORS = [
   { id: "wobble", name: "Wobblewump", type: "Smasher", rarity: "epic", element: "shadow", hp: 10, dmg: 2, special: "BELLY BOUNCE", does: "Bounces the enemy. Stuns for 1 second. 1 extra Damage.", fx: { range: 220, stun: 1, extra: 1 }, boosts: [{ stat: "dmg", amt: 3, vs: "light" }, { stat: "spd", amt: 3, vs: "fire" }] },
   { id: "sockpup", name: "Sock Puppet", type: "Speedster", rarity: "epic", element: "fire", hp: 7, dmg: 1, special: "SPARK SOCK", does: "Throws a sparky sock. The enemy can't see for 2 seconds.", fx: { range: 260, blind: 2 }, boosts: [{ stat: "dmg", amt: 3, vs: "earth" }, { stat: "spd", amt: 3, vs: "water" }] },
   { id: "boombug", name: "Boom Bug", type: "Speedster", rarity: "legendary", element: "fire", bomb: true, hp: 1, dmg: 20, special: "BIG BANG", does: "Can't be blocked. Stuns for 2 seconds.", fx: { unblock: 1, stun: 2 } },
+  { id: "steamb", name: "Steam Breaker", type: "Brawler", rarity: "epic", element: "fire", element2: "water", hp: 7, dmg: 5, special: "SCALD CLOUD", does: "A scalding cloud from far away. Blinds the enemy for 2 seconds. 1 extra Damage.", fx: { range: 260, blind: 2, extra: 1 } },
+  { id: "quakeb", name: "Quake Breaker", type: "Smasher", rarity: "epic", element: "earth", element2: "lightning", hp: 8, dmg: 5, special: "SHOCK QUAKE", does: "Shockwave along the floor. Stuns for 2 seconds. 1 extra Damage.", fx: { range: 200, stun: 2, extra: 1 } },
+  { id: "eclipseb", name: "Eclipse Breaker", type: "Brawler", rarity: "epic", element: "light", element2: "shadow", hp: 7, dmg: 5, special: "TOTAL ECLIPSE", does: "A flash of day and night. Flips the enemy's controls for 2 seconds. 1 extra Damage.", fx: { range: 300, reverse: 2, extra: 1 } },
+  { id: "blazeb", name: "Blaze Breaker", type: "Speedster", rarity: "epic", element: "fire", element2: "lightning", hp: 6, dmg: 6, special: "FLASH FIRE", does: "Zooms in. Can't be blocked. 2 extra Damage.", fx: { unblock: 1, dash: 1, extra: 2 } },
+  { id: "mudb", name: "Mud Breaker", type: "Smasher", rarity: "epic", element: "water", element2: "earth", hp: 8, dmg: 5, special: "MUD SLIDE", does: "Slides into the enemy. Stuns for 1 second. 1 extra Damage.", fx: { range: 200, stun: 1, extra: 1 } },
   { id: "quizowl", name: "Quiz Owl", type: "Brawler", rarity: "special", element: "light", quest: "elemquiz", hp: 7, dmg: 5, special: "HOOT BLAST", does: "A booming hoot from far away. Flips the enemy's controls for 3 seconds.", fx: { range: 300, reverse: 3 } },
   { id: "thunderhawk", name: "Thunderhawk", type: "Speedster", rarity: "special", element: "lightning", quest: "thunder", hp: 6, dmg: 7, special: "THUNDER DIVE", does: "Swoops in. Can't be blocked. 1 extra Damage.", fx: { unblock: 1, dash: 1, extra: 1 } },
   { id: "labbull", name: "Labyrinth Bull", type: "Smasher", rarity: "special", element: "earth", quest: "speedmaze", hp: 9, dmg: 4, special: "HORN CHARGE", does: "Charges in. Stuns for 2 seconds.", fx: { dash: 1, stun: 2 } },
@@ -275,6 +280,11 @@ const WARRIORS = [
   { id: "overlord", name: "Umbra Overlord", type: "Brawler", rarity: "giant", element: "shadow", giant: "quest", armor: 60, hp: 16, dmg: 4, special: "ECLIPSE FIST", does: "Locks their special for 8 seconds and flips their controls for 3. 2 extra Damage.", fx: { lock: 8, reverse: 3, extra: 2, range: 160 } }
 ];
 const BY_ID = Object.fromEntries(WARRIORS.map(w => [w.id, w]));
+// Mega Breakers have two elements (element and element2): they get both perks and both sets of boosts work against them.
+const hasEl = (w, e) => w.element === e || w.element2 === e;
+const elsOf = w => w.element2 ? [w.element, w.element2] : [w.element];
+const elPick = w => w.element2 && Math.random() < 0.5 ? w.element2 : w.element;
+const elName = w => elsOf(w).map(e => ELEMENTS[e].name).join(" + ");
 
 // ===================== GIANT MODE =====================
 // Boulderbash, Volt Vixen and Brickjaw can grow into a giant (more Health and Damage, plus armour to smash off first).
@@ -414,6 +424,11 @@ const FIGS = {
   wobble: { body: "#7a4aa8", armor: "#d8a8ff", dark: "#3a1a58", eye: "#ffe14d", wide: 1.4, extra: "" },
   sockpup: { body: "#e86a4a", armor: "#fff0c8", dark: "#7a2a18", eye: "#2a1a10", wide: 0.95, extra: "" },
   boombug: { body: "#2a2a3c", armor: "#ff4d4d", dark: "#0e0c18", eye: "#ffe14d", wide: 0.95, extra: "" },
+  steamb: { body: "#ff5a2e", armor: "#c04420", dark: "#7a2a12", eye: "#ffffff", wide: 1.2, extra: "" },
+  quakeb: { body: "#b08a4a", armor: "#846830", dark: "#4a3a1a", eye: "#ffffff", wide: 1.3, extra: "" },
+  eclipseb: { body: "#fff2b0", armor: "#bfb184", dark: "#6a6240", eye: "#2a1a10", wide: 1.1, extra: "" },
+  blazeb: { body: "#ff5a2e", armor: "#c04420", dark: "#7a2a12", eye: "#ffffff", wide: 0.95, extra: "" },
+  mudb: { body: "#3da8ff", armor: "#2e7dbf", dark: "#1b4b73", eye: "#ffffff", wide: 1.2, extra: "" },
   quizowl: { body: "#8a6a4a", armor: "#fff0c8", dark: "#4a3622", eye: "#ffe14d", wide: 1.0, extra: "" },
   thunderhawk: { body: "#3a4a7a", armor: "#ffe14d", dark: "#1a2240", eye: "#fff36b", wide: 0.9, extra: "" },
   labbull: { body: "#8a5a3a", armor: "#d8b060", dark: "#4a2a16", eye: "#ff4d4d", wide: 1.3, extra: "" },
@@ -666,6 +681,11 @@ const DESIGN = {
   wobble: { head: "dog", body: "block", arms: "stubby", legs: "stumps", deco: ["stitches"] },
   sockpup: { head: "dog", body: "slim", arms: "stubby", legs: "legs", tail: "feather", deco: ["stitches"] },
   boombug: { head: "bug", body: "orb", arms: "stubby", legs: "legs", tail: "flame" },
+  steamb: { head: "rockhead", body: "block", arms: "fists", legs: "stumps", deco: ["gears"] },
+  quakeb: { head: "helmet", body: "barrel", arms: "fists", legs: "stumps", deco: ["stitches"] },
+  eclipseb: { head: "helmet", body: "cloak", arms: "arms", legs: "legs", deco: ["halo"] },
+  blazeb: { head: "bird", body: "slim", arms: "arms", legs: "legs", tail: "flame", deco: ["crown"] },
+  mudb: { head: "rockhead", body: "pear", arms: "stubby", legs: "stumps", deco: ["stitches"] },
   quizowl: { head: "bird", body: "pear", arms: "stubby", legs: "legs", tail: "feather" },
   thunderhawk: { head: "bird", body: "slim", arms: "claws", legs: "legs", tail: "bolt" },
   labbull: { head: "ox", body: "barrel", arms: "fists", legs: "stumps" },
@@ -704,20 +724,32 @@ function armorSVG(accent) {
   const piece = A => A.parts.map(d => `<path d="${d}" fill="url(#stl)" stroke="#232c47" stroke-width="2" stroke-linejoin="round"/>`).join("") + (A.trim ? `<path d="${A.trim}" fill="${accent}" stroke="#232c47" stroke-width="1.5"/>` : "") + (A.lines || []).map(d => `<path d="${d}" fill="none" stroke="#ffffff88" stroke-width="1.2"/>`).join("") + (A.gem ? `<circle cx="${A.gem[0]}" cy="${A.gem[1]}" r="${A.gem[2]}" fill="${accent}" stroke="#fff" stroke-width="1.5"/>` : "") + A.rivets.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.6" fill="#dfe6f5" stroke="#232c47" stroke-width=".8"/>`).join("");
   return `<defs><linearGradient id="stl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2f5fc"/><stop offset=".45" stop-color="#aab7d0"/><stop offset="1" stop-color="#5d6a86"/></linearGradient></defs>` + piece(ARM_SHAPES.shL) + piece(ARM_SHAPES.shR) + piece(ARM_SHAPES.chest) + piece(ARM_SHAPES.helm);
 }
+const shade = (hex, k) => "#" + [1, 3, 5].map(i => Math.round(parseInt(hex.substr(i, 2), 16) * k).toString(16).padStart(2, "0")).join("");
 function figure(k, bare) {
-  const f = FIGS[k], d = DESIGN[k] || { head: "box", body: "box", arms: "arms", legs: "legs" }, w = f.wide, cx = 60, tw = 46 * w, sw = 62 * w, info = BY_ID[k] || {};
-  const P = { f, d, w, cx, tw, sw };
+  const f0 = FIGS[k], d = DESIGN[k] || { head: "box", body: "box", arms: "arms", legs: "legs" }, w = f0.wide, cx = 60, tw = 46 * w, sw = 62 * w, info = BY_ID[k] || {};
   const body = d.body || "box";
-  const part = (T, name) => (T[name] ? T[name](P) : "");
-  return `<svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Drawing of ${k}">
-    <ellipse cx="${cx}" cy="155" rx="${34 * w}" ry="4" fill="#0006"/>
+  const draw = (f, el) => {
+    const P = { f, d, w, cx, tw, sw };
+    const part = (T, name) => (T[name] ? T[name](P) : "");
+    return `<ellipse cx="${cx}" cy="155" rx="${34 * w}" ry="4" fill="#0006"/>
     ${part(BACK, d.back)}${part(TAIL, d.tail)}${part(LEGS, d.legs || "legs")}
     ${part(BODY, body)}
-    ${emblem(info.element, cx, f.eye, EMBLEM_Y[body] || 75)}
+    ${emblem(el, cx, f.eye, EMBLEM_Y[body] || 75)}
     ${part(ARMS, d.arms || "arms")}
     ${part(HEAD, d.head || "box")}
     ${(d.deco || []).map(n => (DECO[n] ? DECO[n](P) : n === "halo" ? BACK.halo(P) : "")).join("")}
-    ${trimFor(info.rarity, cx, tw, sw, f, body === "cloak" ? 104 : 98)}
+    ${trimFor(info.rarity, cx, tw, sw, f, body === "cloak" ? 104 : 98)}`;
+  };
+  if (info.element2) {   // Mega Breakers: the left half is one element and the right half is another
+    const half = el => { const c = ELEMENTS[el].color; return { ...f0, body: c, armor: shade(c, 0.75), dark: shade(c, 0.45) }; };
+    return `<svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Drawing of ${k}">
+    <defs><clipPath id="mbL"><rect x="0" y="0" width="60" height="160"/></clipPath><clipPath id="mbR"><rect x="60" y="0" width="60" height="160"/></clipPath></defs>
+    <g clip-path="url(#mbL)">${draw(half(info.element), info.element)}</g><g clip-path="url(#mbR)">${draw(half(info.element2), info.element2)}</g>
+    <line x1="60" y1="4" x2="60" y2="152" stroke="#0e0c18" stroke-width="1.6" opacity=".6"/>
+  </svg>`;
+  }
+  return `<svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Drawing of ${k}">
+    ${draw(f0, info.element)}
     ${info.giant && !bare ? armorSVG(ELEMENTS[info.element].color) : ""}
   </svg>`;
 }
@@ -747,7 +779,7 @@ function cardHTML(w, cls = "") {
   return `<div class="card ${w.rarity} ${cls}" style="--ec:${el.color}">
     <div class="nm">${w.name}</div><div class="rr">${w.rarity === "special" ? "special - quest reward" : w.rarity}</div>
     <div class="art">${figure(w.id)}</div>
-    <div class="tys"><span class="ty" style="background:${TYPE_COLOR[w.type]}">${w.type.toUpperCase()}</span><span class="ty" style="background:${el.color}">${el.icon} ${el.name.toUpperCase()}</span></div>
+    <div class="tys"><span class="ty" style="background:${TYPE_COLOR[w.type]}">${w.type.toUpperCase()}</span>${elsOf(w).map(e => `<span class="ty" style="background:${ELEMENTS[e].color}">${ELEMENTS[e].icon} ${ELEMENTS[e].name.toUpperCase()}</span>`).join("")}</div>
     <div class="st"><span>HEALTH <b>${w.hp}</b></span><span>DAMAGE <b>${w.dmg}</b></span><span>SPEED <b>${SPEED_NUM[w.type]}</b></span></div>
     ${gmHTML(w)}
     ${w.armor ? `<div class="st"><span>ARMOUR <b>${w.armor}</b></span><span>GIANT</span></div>` : ""}
@@ -1193,7 +1225,7 @@ function shopScreen(note = "") {
     ${["common", "rare", "epic", "legendary", "giant"].map(r => `
       <div class="sec"><h2 class="shelf" style="color:${RARITY_COLOR[r]}">${r === "giant" ? "Giants (not for sale)" : r[0].toUpperCase() + r.slice(1) + " warriors"}</h2>${r === "giant" ? `<p class="sub">Giants wear armour you must smash off first. Win them in the Giant Hunt (Arena), in Side Quests, or find them in a Giant Disk.</p>` : ""}
       <div class="grid">${WARRIORS.filter(w => w.rarity === r).map(w => { const own = save.owned.includes(w.id);
-        const find = `${w.name} ${w.rarity} ${w.type} ${ELEMENTS[w.element].name} ${w.special} ${w.does} ${boostText(w.id)} ${own ? "owned" : "locked"}`.toLowerCase().replace(/"/g, "");
+        const find = `${w.name} ${w.rarity} ${w.type} ${elName(w)} ${w.special} ${w.does} ${boostText(w.id)} ${own ? "owned" : "locked"}`.toLowerCase().replace(/"/g, "");
         return `<div class="shopitem" data-s="${find}" ${boostData(w.id)}>${cardHTML(w)}${w.giant ? `<button class="btn alt" disabled>${own ? "Owned" : w.giant === "arena" ? "Win it in the Arena" : "Win it in a Side Quest"}</button>` : `<button class="btn ${own || !rankOK(w) ? "alt" : ""}" data-buy="${w.id}" ${own || !rankOK(w) ? "disabled" : ""}>${own ? "Owned" : !rankOK(w) ? `\u{1F512} Needs ${w.rarity[0].toUpperCase() + w.rarity.slice(1)} rank` : `Buy · ${priceOf(w)}`}</button>`}</div>`; }).join("")}</div></div>`).join("")}`);
   const box = document.getElementById("wsearch");
   box.oninput = () => { shopQuery = box.value; applyShopSearch(); if (/banana/i.test(box.value)) award("banana"); };
@@ -1306,7 +1338,7 @@ function openDisk(kind = "basic") {
 // ===================== TEAM BENCH =====================
 // Search box used by the team bench and the 2 player picker (same idea as the shop search).
 let pickQuery = "";
-const pickFind = (w, extra) => `${w.name} ${w.rarity} ${w.type} ${ELEMENTS[w.element].name} ${w.special} ${w.does} ${boostText(w.id)} ${extra}`.toLowerCase().replace(/"/g, "");
+const pickFind = (w, extra) => `${w.name} ${w.rarity} ${w.type} ${elName(w)} ${w.special} ${w.does} ${boostText(w.id)} ${extra}`.toLowerCase().replace(/"/g, "");
 const pickSearchHTML = () => `<input id="psearch" class="wsearch" type="search" placeholder="Search warriors: name, element, type, rarity, picked" autocomplete="off" aria-label="Search warriors" value="${pickQuery.replace(/"/g, "&quot;")}">${boostFilterHTML()}<p class="sub" id="pnores" hidden>No warriors match that search.</p>`;
 function wirePickSearch() {
   const box = document.getElementById("psearch"), none = document.getElementById("pnores");
@@ -1373,11 +1405,11 @@ function teamScreen(onDone) {
 // ===================== GET READY (last chance to change your team) =====================
 // Before any arena, giant or quest fight: shows who you are facing and which boosts match, then lets you change your team.
 function matchupLines(mine, foes) {
-  const out = [], line = (who, w, b, foe) => b.stat === "dmg" ? `${w.name} does +${b.amt} Damage to ${foe.name} (${ELEMENTS[foe.element].name})` : b.stat === "spd" ? `${w.name} walks +${b.amt} faster against ${foe.name} (${ELEMENTS[foe.element].name})` : `${w.name} takes ${b.amt} less Damage from ${foe.name} (${ELEMENTS[foe.element].name})`;
+  const out = [], line = (who, w, b, foe) => b.stat === "dmg" ? `${w.name} does +${b.amt} Damage to ${foe.name} (${elName(foe)})` : b.stat === "spd" ? `${w.name} walks +${b.amt} faster against ${foe.name} (${elName(foe)})` : `${w.name} takes ${b.amt} less Damage from ${foe.name} (${elName(foe)})`;
   for (const id of mine) for (const fid of foes) {
     const a = BY_ID[id], f = BY_ID[fid];
-    for (const b of boostsOf(id)) if (b.vs === f.element) out.push([true, line(a, a, b, f)]);
-    for (const b of boostsOf(fid)) if (b.vs === a.element) out.push([false, line(f, f, b, a)]);
+    for (const b of boostsOf(id)) if (hasEl(f, b.vs)) out.push([true, line(a, a, b, f)]);
+    for (const b of boostsOf(fid)) if (hasEl(a, b.vs)) out.push([false, line(f, f, b, a)]);
   }
   return out;
 }
@@ -1588,7 +1620,7 @@ function updateActor(a, I) {
   a.block = I.block;
   if (a.block) return;
   let dx = I.r - I.l, dy = I.d - I.u; if (a.reverse > 0) { dx = -dx; dy = -dy; }
-  if (dx || dy) { a.moving = true; const n = Math.hypot(dx, dy), sp = st.spd * (f.w.element === "lightning" ? 1.08 : 1) * (f.w.giant ? 0.85 : 1) * (1 + 0.08 * (((F.lastBoostKey === F.idx[0] + "-" + F.idx[1] ? activeBoost(a.p) : null) || {}).stat === "spd" ? activeBoost(a.p).amt : 0)); a.x += dx / n * sp; a.y += dy / n * sp; }
+  if (dx || dy) { a.moving = true; const n = Math.hypot(dx, dy), sp = st.spd * (hasEl(f.w, "lightning") ? 1.08 : 1) * (f.w.giant ? 0.85 : 1) * (1 + 0.08 * (((F.lastBoostKey === F.idx[0] + "-" + F.idx[1] ? activeBoost(a.p) : null) || {}).stat === "spd" ? activeBoost(a.p).amt : 0)); a.x += dx / n * sp; a.y += dy / n * sp; }
   // Special bar full? Any punch or kick fires the special instead. (The tutorial holds this back until step 5.)
   const ready = f.charge >= 100 && a.lock <= 0 && !(F.tut && F.tut.step < 4 && a.p === 0);
   if ((I.special || I.punch || I.kick) && ready) doSpecial(a, f);
@@ -1599,7 +1631,7 @@ function updateActor(a, I) {
 // A warrior's boost is "active" while the warrior it is facing has the boost's element.
 function activeBoost(p) {
   const f = cur(p), o = cur(1 - p);
-  return f && o ? boostsOf(f.w.id).find(b => b.vs === o.w.element) || null : null;   // a warrior's 2 boosts are against different elements, so at most 1 is on at a time
+  return f && o ? boostsOf(f.w.id).find(b => hasEl(o.w, b.vs)) || null : null;   // a warrior's 2 boosts are against different elements, so at most 1 is on at a time
 }
 // When a matchup starts, a banner flies across the screen for every boost that is active in it.
 function announceBoosts() {
@@ -1678,16 +1710,16 @@ function updateFight() {
   for (const p of [0, 1]) {
     const f = cur(p), a = F.actors[p];
     // charge slowly fills by itself too, so specials always come eventually (Lightning fills faster)
-    if (!F.opts.nospecial && !(F.tut && F.tut.step < 4 && p === 0)) f.charge = Math.min(100, f.charge + 0.06 * (f.w.element === "lightning" ? 1.5 : 1));
+    if (!F.opts.nospecial && !(F.tut && F.tut.step < 4 && p === 0)) f.charge = Math.min(100, f.charge + 0.06 * (hasEl(f.w, "lightning") ? 1.5 : 1));
     if (f.spikeT > 0) f.spikeT--;
-    if (F.t % 8 === 0) emit(a.x + (Math.random() - .5) * 44, a.y - 20 - Math.random() * 90, f.w.element, 1, .7, .6, true);   // element aura
+    if (F.t % 8 === 0) emit(a.x + (Math.random() - .5) * 44, a.y - 20 - Math.random() * 90, elPick(f.w), 1, .7, .6, true);   // element aura
     if (a.boostFx > 0) a.boostFx--;
     { const ab = F.lastBoostKey === F.idx[0] + "-" + F.idx[1] ? activeBoost(p) : null;
       if (ab && F.t % 6 === 0) emit(a.x + (Math.random() - .5) * 44, a.y - 20, BOOST_FX[ab.stat], 1, .5, 1.3, true); }
     if (f.charge >= 100 && !f.readyRang) { f.readyRang = true; Sound.ready(); }
     if (f.charge < 100) f.readyRang = false;
     // Water perk: slowly refills the fight bar
-    if (f.w.element === "water" && F.t % 30 === 0) a.bar = Math.min(a.max, a.bar + 2);
+    if (hasEl(f.w, "water") && F.t % 30 === 0) a.bar = Math.min(a.max, a.bar + 2);
     // Fire perk: a burning warrior loses a little fight bar every half second
     if (a.burn > 0) { a.burn--; if (a.burn % 30 === 0) { if (a.armor > 0) a.armor = Math.max(0, a.armor - 3); else a.bar -= 3; if (a.bar <= 0) { defeat(a.burnBy, false); return; } } }
   }
@@ -1708,7 +1740,7 @@ function inReach(a, o, m) {
 }
 function resolveHit(p) {
   const A = F.actors[p], D = F.actors[1 - p], fa = cur(p), fd = cur(1 - p), m = A.act;
-  const add = (f, n) => { if (!F.opts.nospecial) f.charge = Math.min(100, f.charge + n * (f.w.element === "lightning" ? 1.5 : 1)); };
+  const add = (f, n) => { if (!F.opts.nospecial) f.charge = Math.min(100, f.charge + n * (hasEl(f.w, "lightning") ? 1.5 : 1)); };
   const up = D.y - 190;
   if (D.invis > 0) return pop("MISS", D.x, up, "#a59fc4", 22);
   if (D.block && !m.unblock && Math.sign(A.x - D.x) === D.face && !D.stun) {
@@ -1727,7 +1759,7 @@ function resolveHit(p) {
   // A clean hit knocks down the fight bar. Smashers hit hardest, Speedsters lightest (but fastest).
   // Element perk: Earth takes 15% less from every hit.
   let power = HIT_POWER[m.name] * TYPE_POWER[fa.w.type], note = null;
-  if (fd.w.element === "earth") power *= 0.85;
+  if (hasEl(fd.w, "earth")) power *= 0.85;
   if (fd.reflect) {
     fd.reflect = false; A.bar -= power; Sound.block();
     pop("REFLECTED!", A.x, A.y - 190, "#ffc0e8");
@@ -1737,7 +1769,7 @@ function resolveHit(p) {
   let cleansed = false;
   const armored = D.armor > 0;   // armour soaks the whole hit: no damage, no status effects, no flinch
   if (m.special) {
-    const s = fa.w.fx, pure = fd.w.element === "light";
+    const s = fa.w.fx, pure = hasEl(fd.w, "light");
     power = s.fixed != null ? 30 : power * (s.mult || 1) + (s.extra || 0) * 8;
     if (s.stun && !armored) { D.stun = Math.max(D.stun, s.stun * 60); if (D.p === 0 && F.opts.mode !== "2p") bump("stuns"); }
     if (armored) { /* armour blocks status effects */ }
@@ -1753,7 +1785,7 @@ function resolveHit(p) {
       if (next) { if (1 - p === 0) F.lost0 += s.splash; next.hp = Math.max(0, next.hp - s.splash); pop(`${next.w.name} -${s.splash}`, D.x, D.y - 250, "#7dfcff", 20); }
     }
   } else if (fa.frenzy > 0) { power += 10; fa.frenzy--; }
-  if (fa.w.element === "shadow" && A.ambush) { power *= 1.3; pop("AMBUSH!", A.x, A.y - 200, "#b48cff", 24); }   // Shadow perk: first hit each round is +30%
+  if (hasEl(fa.w, "shadow") && A.ambush) { power *= 1.3; pop("AMBUSH!", A.x, A.y - 200, "#b48cff", 24); }   // Shadow perk: first hit each round is +30%
   A.ambush = false;
   let armNote = null;
   if (armored) {
@@ -1762,12 +1794,12 @@ function resolveHit(p) {
     emit(D.x, D.y - 90, "metal", D.armor <= 0 ? 20 : 8, D.armor <= 0 ? 8 : 5);
     F.shake = D.armor <= 0 ? 12 : 4; Sound.block();
   } else {
-    if (fa.w.element === "fire") { D.burn = 120; D.burnBy = p; }
+    if (hasEl(fa.w, "fire")) { D.burn = 120; D.burnBy = p; }
     if (p === 0 && F.opts.mode !== "2p" && D.bar >= D.max - 0.001 && D.bar - power <= 0) award("oneshot");   // knocked out from a full fight bar in one hit
     D.bar -= power; D.act = null; D.block = false;
     D.stun = Math.max(D.stun, 12); D.x += m.ax * 22; D.y += m.ay * 22; clampArena(D); F.shake = 5;
     Sound.hit();
-  } D.flash = 6; emit(D.x, D.y - 70, fa.w.element, m.special ? 26 : 12, m.special ? 7 : 5);
+  } D.flash = 6; emit(D.x, D.y - 70, elPick(fa.w), m.special ? 26 : 12, m.special ? 7 : 5);
   if (fd.spikeT > 0) { A.bar -= 15; pop("SPIKES!", A.x, A.y - 190, "#c8f06a", 22); if (A.p === 0 && F.opts.mode !== "2p") bump("spiked"); }
   add(fa, 12); add(fd, 18);
   pop(m.name === "kick" ? "KICK!" : m.name === "punch" ? "PUNCH!" : "WHAM!", (A.x + D.x) / 2, D.y - 160, "#fff36b", 24);
@@ -1781,8 +1813,8 @@ function resolveHit(p) {
 function calcDefeat(fw, fl, bySpecial) {   // how much Health the winner takes off the loser (the HUD shows this too)
   let dmg = fw.w.dmg;
   if (bySpecial) { const s = fw.w.fx; dmg = s.fixed != null ? s.fixed : fw.w.dmg * (s.mult || 1) + (s.extra || 0); }
-  const plus = boostsOf(fw.w.id).filter(b => b.stat === "dmg" && b.vs === fl.w.element).reduce((s, b) => s + b.amt, 0);     // winner's Damage boost
-  const minus = boostsOf(fl.w.id).filter(b => b.stat === "res" && b.vs === fw.w.element).reduce((s, b) => s + b.amt, 0);   // loser's Resistance boost
+  const plus = boostsOf(fw.w.id).filter(b => b.stat === "dmg" && hasEl(fl.w, b.vs)).reduce((s, b) => s + b.amt, 0);     // winner's Damage boost
+  const minus = boostsOf(fl.w.id).filter(b => b.stat === "res" && hasEl(fw.w, b.vs)).reduce((s, b) => s + b.amt, 0);   // loser's Resistance boost
   return { base: dmg, plus, minus, dmg: Math.max(1, dmg + plus - minus) };
 }
 function defeat(winner, bySpecial) {
@@ -1809,7 +1841,7 @@ function endRound(winner, dmg) {
   F.phase = "roundEnd"; F.t = 0; F.shake = 14; Sound.bell();
   const loser = F.actors[1 - winner];
   pop(dmg > 0 ? `-${dmg}` : "SAFE!", loser.x, loser.y - 120, dmg > 0 ? "#ff4d6a" : "#9be22d", 48);
-  emit(loser.x, loser.y - 80, cur(winner).w.element, 40, 9);
+  emit(loser.x, loser.y - 80, elPick(cur(winner).w), 40, 9);
   F.msg = `${cur(winner).w.name} defeats ${cur(1 - winner).w.name}!`;
   F.actors.forEach(a => { a.act = null; a.block = false; });
 }
@@ -2189,7 +2221,7 @@ function drawActor(a) {
   drawFig(ctx, f.w.id, x, y, size, a.face, a.invis > 0 ? 0.25 : 1, fxo);
   if (a.armorMax) drawArmor(a, f, x, y, size, h, fxo);
   if (active && m.name !== "buff") {
-    if (m.special) drawBeam(a, m, f.w.element, cy, sc);
+    if (m.special) drawBeam(a, m, (m.bel = m.bel || elPick(f.w)), cy, sc);
     const reach = Math.min(m.range, 140) * 0.75;
     star(a.x + m.ax * reach, cy + m.ay * reach * 0.5, m.special ? 30 : 18, "#fff36b");
   }
@@ -2490,7 +2522,7 @@ function quizGame(id, icon, title, set) {
   };
   show();
 }
-const fightWith = (el) => { const pool = WARRIORS.filter(w => w.element === el && !w.quest && !w.giant && !w.bomb && !w.starter); const out = []; while (out.length < 3 && out.length < pool.length) { const w = pool[Math.floor(Math.random() * pool.length)]; if (!out.includes(w.id)) out.push(w.id); } return out; };
+const fightWith = (el) => { const pool = WARRIORS.filter(w => w.element === el && !w.element2 && !w.quest && !w.giant && !w.bomb && !w.starter); const out = []; while (out.length < 3 && out.length < pool.length) { const w = pool[Math.floor(Math.random() * pool.length)]; if (!out.includes(w.id)) out.push(w.id); } return out; };
 
 // ----- riddle chest (no fighting, just thinking) -----
 const RIDDLES = [
