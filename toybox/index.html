@@ -278,8 +278,9 @@ const BY_ID = Object.fromEntries(WARRIORS.map(w => [w.id, w]));
 
 // ===================== GIANT MODE =====================
 // Boulderbash, Volt Vixen and Brickjaw can grow into a giant (more Health and Damage, plus armour to smash off first).
-// Unlock: win 10 Arena battles with them on your team. Then switch it on or off in the Team bench.
-const GM_WINS = 10;
+// Unlock: win 15 Arena battles with them on your team. Then switch it on or off in the Team bench.
+const GM_WINS = 15;
+const COIN_RATE = 0.5, cr = n => Math.max(1, Math.round(n * COIN_RATE));   // all coin rewards are halved so the game lasts longer
 const GIANT_FORMS = { boulder: { hp: 13, dmg: 5, armor: 40 }, volt: { hp: 11, dmg: 4, armor: 30 }, brick: { hp: 12, dmg: 6, armor: 40 } };
 const gmWins = id => (save && save.stats && save.stats.teamWins && save.stats.teamWins[id]) || 0;
 const gmUnlocked = id => !!GIANT_FORMS[id] && gmWins(id) >= GM_WINS;
@@ -301,7 +302,7 @@ function gmPanel() {   // shown at the top of the Team bench
 
 // ===================== RANKS =====================
 // Your rank goes up with Arena wins. To buy a warrior (or pull one from a disk) you need its rarity as your rank, or higher.
-const RANKS = ["common", "rare", "epic", "legendary"], RANK_WINS = [0, 5, 15, 30];
+const RANKS = ["common", "rare", "epic", "legendary"], RANK_WINS = [0, 8, 24, 50];
 const rankName = i => RANKS[i][0].toUpperCase() + RANKS[i].slice(1);
 function rankIdx() { let r = 0; RANK_WINS.forEach((n, i) => { if ((save.wins || 0) >= n) r = i; }); return r; }
 const rankOK = w => RANKS.indexOf(w.rarity) <= rankIdx();
@@ -851,12 +852,12 @@ const ADV = [
   { id: "piggy", icon: "\u{1F437}", name: "Piggy Bank", desc: "Have 1000 coins at once.", tag: "SHOP" },
   { id: "graduate", icon: "\u{1F393}", name: "Graduate", desc: "Win the tutorial battle.", coins: 10, tag: "FIGHT" },
   { id: "tagteam", icon: "\u{1F91D}", name: "Tag Team", desc: "Finish a 2 player fight.", coins: 20, tag: "FIGHT" },
-  { id: "gm_boulder", icon: "\u{1F5FF}", name: "Giant Mode: Boulderbash", desc: "Win 10 Arena battles with Boulderbash on your team. Unlocks Giant Mode!", coins: 50, tag: "GIANT" },
-  { id: "gm_volt", icon: "\u26A1", name: "Giant Mode: Volt Vixen", desc: "Win 10 Arena battles with Volt Vixen on your team. Unlocks Giant Mode!", coins: 50, tag: "GIANT" },
-  { id: "gm_brick", icon: "\u{1F40A}", name: "Giant Mode: Brickjaw", desc: "Win 10 Arena battles with Brickjaw on your team. Unlocks Giant Mode!", coins: 50, tag: "GIANT" },
-  { id: "rank_rare", icon: "\u{1F948}", name: "Rare Rank", desc: "Win 5 Arena fights to reach Rare rank. You can now buy Rare warriors!", coins: 50, tag: "RANK" },
-  { id: "rank_epic", icon: "\u{1F396}\uFE0F", name: "Epic Rank", desc: "Win 15 Arena fights to reach Epic rank. You can now buy Epic warriors!", coins: 100, tag: "RANK" },
-  { id: "rank_legendary", icon: "\u{1F451}", name: "Legendary Rank", desc: "Win 30 Arena fights to reach Legendary rank. You can now buy Legendary warriors!", coins: 200, tag: "RANK" },
+  { id: "gm_boulder", icon: "\u{1F5FF}", name: "Giant Mode: Boulderbash", desc: "Win 15 Arena battles with Boulderbash on your team. Unlocks Giant Mode!", coins: 50, tag: "GIANT" },
+  { id: "gm_volt", icon: "\u26A1", name: "Giant Mode: Volt Vixen", desc: "Win 15 Arena battles with Volt Vixen on your team. Unlocks Giant Mode!", coins: 50, tag: "GIANT" },
+  { id: "gm_brick", icon: "\u{1F40A}", name: "Giant Mode: Brickjaw", desc: "Win 15 Arena battles with Brickjaw on your team. Unlocks Giant Mode!", coins: 50, tag: "GIANT" },
+  { id: "rank_rare", icon: "\u{1F948}", name: "Rare Rank", desc: "Win 8 Arena fights to reach Rare rank. You can now buy Rare warriors!", coins: 50, tag: "RANK" },
+  { id: "rank_epic", icon: "\u{1F396}\uFE0F", name: "Epic Rank", desc: "Win 24 Arena fights to reach Epic rank. You can now buy Epic warriors!", coins: 100, tag: "RANK" },
+  { id: "rank_legendary", icon: "\u{1F451}", name: "Legendary Rank", desc: "Win 50 Arena fights to reach Legendary rank. You can now buy Legendary warriors!", coins: 200, tag: "RANK" },
   // ---- silly ones ----
   { id: "dizzy", icon: "\u{1F635}", name: "Dizzy Duck", desc: "Get stunned 15 times.", stat: "stuns", goal: 15, silly: true, tag: "SILLY" },
   { id: "butter", icon: "\u{1F9C8}", name: "Butter Fingers", desc: "Swing and miss 30 times.", stat: "whiffs", goal: 30, silly: true, tag: "SILLY" },
@@ -873,6 +874,7 @@ const ADV = [
   { id: "fashion", icon: "\u{1F457}", name: "Fashion Show", desc: "Open the team bench 15 times.", stat: "bench", goal: 15, silly: true, tag: "SILLY" },
   { id: "quacker", icon: "\u{1F986}", name: "Certified Silly", desc: "Earn 5 silly advancements.", warrior: "quacks", silly: true, tag: "SILLY" }
 ];
+ADV.forEach(a => { if (a.coins) a.coins = cr(a.coins); });
 var advReady = false, inState = false;
 function bump(stat, n = 1) {   // counts something, and awards any advancement whose goal is reached
   if (!save) return;
@@ -1411,7 +1413,7 @@ function arenaScreen() {
   const lv = cpuLevel();
   overlay(`<h2>The Arena</h2><p class="sub">Your team: ${save.team.map(id => BY_ID[id].name).join(", ")}</p>
     <div class="row">
-      <button class="btn" id="cpu">VS Computer<br><small>Level ${lv + 1} · win ${25 + lv * 5}+ coins<br>opponents match your skill</small></button>
+      <button class="btn" id="cpu">VS Computer<br><small>Level ${lv + 1} · win ${12 + lv * 3}+ coins<br>opponents match your skill</small></button>
       <button class="btn alt" id="two">2 Players<br><small>one keyboard</small></button>
       <button class="btn alt" id="giant">Giant Hunt<br><small>smash the armour, win a giant</small></button>
       <button class="btn alt" id="tut">Tutorial<br><small>learn to fight</small></button>
@@ -1890,7 +1892,7 @@ function results() {
   let title, sub = "", earned = 0;
   if (cpu) {
     const won = F.winner === 0;
-    earned = won ? 25 + F.opts.level * 5 + F.kos[0] * 5 : 5 + F.kos[0] * 2;
+    earned = won ? 12 + F.opts.level * 3 + F.kos[0] * 3 : 3 + F.kos[0];
     save.coins += earned; if (won) save.wins++; persist();
     title = won ? "YOU WIN!" : F.winner < 0 ? "DRAW!" : "YOU LOST";
     sub = (won ? "Next time the computer will be tougher." : "Try a different team order, or block more!") + (F.skillMsg === "up" ? ` Level up! Now level ${cpuLevel() + 1}.` : F.skillMsg === "down" ? ` The computer will go a bit easier: level ${cpuLevel() + 1}.` : "");
@@ -2289,7 +2291,7 @@ function giantHuntScreen(note = "") {
     <p class="sub">Giants wear armour that you must smash off before you can hurt them. Beat one to win it for your team!</p>
     <p class="sub note">${note}</p>
     <div class="grid">${gs.map(w => { const own = save.owned.includes(w.id);
-      return `<div class="shopitem">${cardHTML(w)}<button class="btn ${own ? "alt" : ""}" data-g="${w.id}">${own ? "Rematch (15 coins)" : "Fight!"}</button></div>`; }).join("")}</div>
+      return `<div class="shopitem">${cardHTML(w)}<button class="btn ${own ? "alt" : ""}" data-g="${w.id}">${own ? "Rematch (${cr(15)} coins)" : "Fight!"}</button></div>`; }).join("")}</div>
     <button class="btn alt" id="back">Back to the Arena</button>`);
   ov.querySelectorAll("[data-g]").forEach(b => b.onclick = () => previewFight([b.dataset.g], { mode: "giant", giant: b.dataset.g, level: 5 }, () => giantHuntScreen()));
   document.getElementById("back").onclick = () => arenaScreen();
@@ -2305,7 +2307,7 @@ function giantResults() {
     document.getElementById("ok").onclick = () => giantHuntScreen();
     return;
   }
-  const first = !save.owned.includes(id), coins = first ? 100 : 15;
+  const first = !save.owned.includes(id), coins = first ? cr(100) : cr(15);
   if (first) { save.owned.push(id); if (!teamRule(save.team, id)) save.team.push(id); }
   save.coins += coins; persist(); Sound.win(); confetti(["#ff8a3c", "#ffffff", "#ffc93c"], 220);
   overlay(`<h1 style="font-size:clamp(28px,5vw,56px)">GIANT DEFEATED!</h1><div class="toast" style="color:#ffc93c">+${coins} coins</div>
@@ -2341,8 +2343,15 @@ const QUESTS = [
   { id: "deepdive", icon: "\u{1F30A}", name: "Deep Dive", kind: "FIGHT", desc: "Three water warriors in a row. Lightning might help!", reward: { coins: 80 } },
   { id: "doubletime", icon: "⏱️", name: "Double Time", kind: "FIGHT", desc: "Beat 2 opponents in just 60 seconds. No time to waste!", reward: { coins: 90 } },
   { id: "odds", icon: "\u{1F4AA}", name: "Against the Odds", kind: "FIGHT", desc: "Only your first warrior fights, against 2 tough opponents. A real challenge!", reward: { coins: 120 } },
-  { id: "boss", icon: "👑", name: "The Shadow King", kind: "BOSS", desc: "Beat the Shadow King and his two guards to win him for your team.", reward: { coins: 80, warrior: "gloomfang" } }
+  { id: "boss", icon: "👑", name: "The Shadow King", kind: "BOSS", desc: "Beat the Shadow King and his two guards to win him for your team.", reward: { coins: 80, warrior: "gloomfang" } },
+  { id: "tempest", icon: "\u{1F32A}\uFE0F", name: "Tempest", kind: "SURVIVE", desc: "The longest storm yet. Dodge the lightning for 60 seconds with only 2 lives.", reward: { coins: 100 } },
+  { id: "marathon", icon: "\u{1F9ED}", name: "Maze Marathon", kind: "MAZE", desc: "A fresh maze and just 40 seconds. Plan your turns and run!", reward: { coins: 100 } },
+  { id: "rockwall", icon: "\u{1FAA8}", name: "Rock Wall", kind: "FIGHT", desc: "Three earth warriors in a row. They take less from every hit, so bring Lightning or Shadow!", reward: { coins: 90 } },
+  { id: "gauntlet", icon: "\u{1F3C1}", name: "The Gauntlet", kind: "FIGHT", desc: "Three tough opponents, one after another, at a high level. Only the best teams win.", reward: { coins: 150 } },
+  { id: "spacequiz", icon: "\u{1F680}", name: "Space Quiz", kind: "PUZZLE", desc: "Five questions about planets, stars and space.", reward: { coins: 60 } },
+  { id: "animalquiz", icon: "\u{1F981}", name: "Animal Quiz", kind: "PUZZLE", desc: "Five questions about animals, from the outback to the deep sea.", reward: { coins: 60 } }
 ];
+QUESTS.forEach(q => { q.reward.coins = cr(q.reward.coins); });
 let Q = null;
 function questScreen(note = "") {
   const done = QUESTS.filter(q => save.quests[q.id]).length;
@@ -2379,6 +2388,12 @@ function startQuest(id) {
   else if (id === "nospecial") introThen(q, "Specials are switched off for this fight. Punch, kick and block your way to a win.", () => previewFight(cpuTeam(3, save.team.length), { mode: "quest", quest: "nospecial", nospecial: true, level: 3 }, () => questScreen()));
   else if (id === "sentinel") introThen(q, "The Solar Sentinel wears armour that has to be smashed off before you can hurt him. Break it, then win the fight!", () => previewFight(["sentinel"], { mode: "quest", quest: "sentinel", level: 5 }, () => questScreen()));
   else if (id === "overlord") introThen(q, "A shadow guard comes first, then the Umbra Overlord. Break his armour each round and watch out for his special lock!", () => previewFight(["gloom", "overlord"], { mode: "quest", quest: "overlord", level: 6 }, () => questScreen()));
+  else if (id === "tempest") introThen(q, "The longest storm! Red circles show where lightning will hit. 60 seconds, only 2 lives, and it keeps getting faster.", () => startStorm({ id: "tempest", dur: 60, lives: 2 }));
+  else if (id === "marathon") introThen(q, "A brand new maze and only 40 seconds. Get the key, then the exit!", () => startMaze({ id: "marathon", dur: 40 }));
+  else if (id === "rockwall") introThen(q, "Three earth warriors are waiting. Earth takes 15% less from every hit, so use your specials and your boosts!", () => previewFight(fightWith("earth"), { mode: "quest", quest: "rockwall", level: 6 }, () => questScreen()));
+  else if (id === "gauntlet") introThen(q, "Three tough opponents, one after another. No tricks: bring your strongest team and block well!", () => previewFight(cpuTeam(10, 3), { mode: "quest", quest: "gauntlet", level: 10 }, () => questScreen()));
+  else if (id === "spacequiz") quizGame("spacequiz", "\u{1F680}", "Space question", SPACEQ.slice().sort(() => Math.random() - 0.5).slice(0, 5));
+  else if (id === "animalquiz") quizGame("animalquiz", "\u{1F981}", "Animal question", ANIMALQ.slice().sort(() => Math.random() - 0.5).slice(0, 5));
   else if (id === "boss") introThen(q, "The Shadow King and his guards are waiting. The King has extra Health and a bigger fight bar, so block well!", () => previewFight(["gloom", "nightclaw", "gloomfang"], { mode: "quest", quest: "boss", boss: "gloomfang", level: 6 }, () => questScreen()));
 }
 function introThen(q, text, go) {
@@ -2389,7 +2404,7 @@ function introThen(q, text, go) {
 }
 function finishQuest(id) {
   const q = QUESTS.find(x => x.id === id), first = !save.quests[id];
-  const coins = first ? q.reward.coins : (["FIGHT", "BOSS", "GIANT"].includes(q.kind) ? 15 : 10);
+  const coins = first ? q.reward.coins : cr(["FIGHT", "BOSS", "GIANT"].includes(q.kind) ? 15 : 10);
   let w = null;
   if (first) {
     save.quests[id] = true; bump("quests");
@@ -2415,13 +2430,33 @@ function failQuest(id, msg) {
 function questFightResults() {
   const won = F.winner === 0, id = F.opts.quest;
   if (won) return finishQuest(id);
-  const why = { mirror: "They know all your moves! Change your team order and try again.", firewalk: "Fire burns every round. Try water or earth warriors.", deepdive: "Water warriors refill their bars. Hit hard and use your specials.", doubletime: "Too slow! Use specials and skip the blocking.", odds: "Tough! Put your strongest warrior first and use your special.", boss: "The Shadow King is tough. Try a different team order, or block more!", nospecial: "Remember: no specials! Use punches, kicks and blocks.", lone: "Only your first warrior fights. Put your strongest as number 1 and use their boosts!", speed: "Too slow, or beaten! Attack more and block less. Specials end fights fast." };
+  const why = { mirror: "They know all your moves! Change your team order and try again.", firewalk: "Fire burns every round. Try water or earth warriors.", deepdive: "Water warriors refill their bars. Hit hard and use your specials.", doubletime: "Too slow! Use specials and skip the blocking.", odds: "Tough! Put your strongest warrior first and use your special.", rockwall: "Earth takes less from every hit. Use specials, and bring Lightning or Shadow.", gauntlet: "Three tough fights in a row! Bring your strongest team and block more.", boss: "The Shadow King is tough. Try a different team order, or block more!", nospecial: "Remember: no specials! Use punches, kicks and blocks.", lone: "Only your first warrior fights. Put your strongest as number 1 and use their boosts!", speed: "Too slow, or beaten! Attack more and block less. Specials end fights fast." };
   failQuest(id, why[id] || "Giants wear armour. Smash the grey bar first, then go for the blue fight bar!");
 }
 function endQuest(next) { Q = null; scene = "menu"; next(); }
 
 
 // ----- quiz quests (no fighting, just thinking) -----
+const SPACEQ = [
+  { q: "Which planet is known as the Red Planet?", a: "Mars", w: ["Venus", "Saturn"] },
+  { q: "What is the closest star to Earth?", a: "The Sun", w: ["The Moon", "Sirius"] },
+  { q: "Which planet has the biggest rings?", a: "Saturn", w: ["Mars", "Mercury"] },
+  { q: "What is the biggest planet in our solar system?", a: "Jupiter", w: ["Earth", "Neptune"] },
+  { q: "What does the Moon go around?", a: "The Earth", w: ["The Sun", "Mars"] },
+  { q: "How many planets are in our solar system?", a: "8", w: ["7", "9"] },
+  { q: "What is a shooting star really?", a: "A space rock burning up", w: ["A tiny star", "A comet's tail"] },
+  { q: "Which planet is the hottest?", a: "Venus", w: ["Mercury", "Mars"] }
+];
+const ANIMALQ = [
+  { q: "What is a baby kangaroo called?", a: "A joey", w: ["A cub", "A pup"] },
+  { q: "Which animal is the fastest on land?", a: "A cheetah", w: ["A horse", "A kangaroo"] },
+  { q: "How many hearts does an octopus have?", a: "3", w: ["1", "8"] },
+  { q: "Which Australian animal sleeps up to 20 hours a day?", a: "A koala", w: ["A dingo", "An emu"] },
+  { q: "What do you call a group of lions?", a: "A pride", w: ["A pack", "A herd"] },
+  { q: "Which bird cannot fly and lives in Australia?", a: "An emu", w: ["A magpie", "A galah"] },
+  { q: "What is the biggest animal in the world?", a: "A blue whale", w: ["An elephant", "A giraffe"] },
+  { q: "Which animal has a pouch and lives in Tasmania?", a: "A Tasmanian devil", w: ["A wombat only", "A platypus"] }
+];
 const TRIVIA = [
   { q: "Which of these animals is a marsupial?", a: "A kangaroo", w: ["A penguin", "A lion"] },
   { q: "How many legs does a spider have?", a: "8", w: ["6", "10"] },
@@ -2623,7 +2658,7 @@ function startStorm(o = {}) {
 }
 function updateStorm() {
   if (--Q.spawn <= 0) {
-    const elapsed = Q.dur - Q.t, hard = Q.qid === "thunder"; Q.spawn = Math.max(hard ? 11 : 16, (hard ? 32 : 42) - Math.floor(elapsed / 40));
+    const elapsed = Q.dur - Q.t, hard = Q.qid === "thunder" || Q.qid === "tempest"; Q.spawn = Math.max(hard ? 11 : 16, (hard ? 32 : 42) - Math.floor(elapsed / 40));
     const n = elapsed > 700 ? 2 : 1;
     for (let i = 0; i < n; i++) Q.bolts.push({ x: 80 + Math.random() * (W - 160), y: 235 + Math.random() * 260, w: 0, warn: 55, hit: false });
     if (Math.random() < 0.25) Q.bolts.push({ x: Q.x + (Math.random() - 0.5) * 60, y: Q.y + (Math.random() - 0.5) * 40, w: 0, warn: 70, hit: false });   // some strikes aim at you
@@ -2881,7 +2916,7 @@ function streetBrawl(i) {
 function streetResults() {
   const won = F.winner === 0, lv = F.opts.level || 1, npc = Mk && Mk.npcs[F.opts.npc];
   let earned = 0;
-  if (won) { earned = 12 + lv * 4 + F.kos[0] * 3; save.coins += earned; if (npc) npc.cool = 60 * 120; persist(); Sound.win(); confetti(); } else Sound.lose();
+  if (won) { earned = 6 + lv * 2 + F.kos[0] * 2; save.coins += earned; if (npc) npc.cool = 60 * 120; persist(); Sound.win(); confetti(); } else Sound.lose();
   Sound.music(null); scene = "menu";
   overlay(`<h1 style="font-size:clamp(30px,6vw,64px)">${won ? "YOU WON THE BRAWL!" : F.winner < 0 ? "DRAW!" : "YOU LOST THE BRAWL"}</h1>
     ${won ? `<div class="toast" style="color:#ffc93c">+${earned} coins</div>` : ""}<p class="sub">${won ? "The brawler needs a rest. Go find another one!" : "Try another team order, or come back stronger."}</p>
