@@ -296,6 +296,12 @@ const gmWins = id => (save && save.stats && save.stats.teamWins && save.stats.te
 const gmUnlocked = id => !!GIANT_FORMS[id] && gmWins(id) >= GM_WINS;
 const gmOn = id => gmUnlocked(id) && !!(save.giantMode && save.giantMode[id]);
 const isG = id => !!BY_ID[id].giant || gmOn(id);
+// Team points: every warrior has 4, 5 or 6 (stronger = more), giants 9, 10 or 11. A team can add up to 15.
+const POINTS_CAP = 15;
+const GIANT_PTS = { goliath: 11, sentinel: 11, overlord: 10, titan: 10, colossus: 9, behemoth: 9 }, GM_PTS = { boulder: 10, brick: 10, volt: 9 };
+const ptsBase = w => GIANT_PTS[w.id] || (w.id === "gloomfang" ? 6 : w.rarity === "common" ? 4 : w.rarity === "legendary" ? 6 : w.rarity === "epic" ? (w.hp + w.dmg >= 13 ? 6 : 5) : 5);
+const ptsOf = id => (gmOn(id) && GM_PTS[id]) || ptsBase(BY_ID[id]);
+const teamPts = team => team.reduce((n, id) => n + ptsOf(id), 0);
 const GM_CACHE = {};
 function effW(id) {   // the warrior as it fights: its giant form if Giant Mode is on
   const w = BY_ID[id]; if (!gmOn(id)) return w;
@@ -303,7 +309,7 @@ function effW(id) {   // the warrior as it fights: its giant form if Giant Mode 
   const fx = { ...w.fx }; if (fx.kind !== "buff") fx.extra = (fx.extra || 0) + 1;
   return GM_CACHE[id] = { ...w, name: "Giant " + w.name, giant: "form", hp: f.hp, dmg: f.dmg, armor: f.armor, fx };
 }
-const gmHTML = w => !GIANT_FORMS[w.id] || !save ? "" : gmUnlocked(w.id) ? `<div class="wpn"><b>\u{1F5FF} GIANT MODE</b> unlocked<small>Switch it on in the Team bench.</small></div>` : `<div class="wpn none"><b>\u{1F5FF} GIANT MODE</b> ${gmWins(w.id)} / ${GM_WINS}<small>Win ${GM_WINS} Arena battles with this warrior on your team.</small></div>`;
+const gmHTML = w => !GIANT_FORMS[w.id] || !save ? "" : gmUnlocked(w.id) ? `<div class="wpn"><b>\u{1F5FF} GIANT MODE</b> unlocked (${GM_PTS[w.id]} points as a giant)<small>Switch it on in the Team bench.</small></div>` : `<div class="wpn none"><b>\u{1F5FF} GIANT MODE</b> ${gmWins(w.id)} / ${GM_WINS}<small>Win ${GM_WINS} Arena battles with this warrior on your team.</small></div>`;
 function gmPanel() {   // shown at the top of the Team bench
   const mine = Object.keys(GIANT_FORMS).filter(id => save.owned.includes(id)); if (!mine.length) return "";
   return `<div class="gmp"><b>\u{1F5FF} Giant Mode</b><div class="row">${mine.map(id => { const w = BY_ID[id], f = GIANT_FORMS[id];
@@ -779,7 +785,7 @@ function cardHTML(w, cls = "") {
   return `<div class="card ${w.rarity} ${cls}" style="--ec:${el.color}">
     <div class="nm">${w.name}</div><div class="rr">${w.rarity === "special" ? "special - quest reward" : w.rarity}</div>
     <div class="art">${figure(w.id)}</div>
-    <div class="tys"><span class="ty" style="background:${TYPE_COLOR[w.type]}">${w.type.toUpperCase()}</span>${elsOf(w).map(e => `<span class="ty" style="background:${ELEMENTS[e].color}">${ELEMENTS[e].icon} ${ELEMENTS[e].name.toUpperCase()}</span>`).join("")}</div>
+    <div class="tys"><span class="ty" style="background:${TYPE_COLOR[w.type]}">${w.type.toUpperCase()}</span><span class="ty" style="background:#ffc93c;color:#2a1a10">\u2605 ${ptsBase(w)} PTS</span>${elsOf(w).map(e => `<span class="ty" style="background:${ELEMENTS[e].color}">${ELEMENTS[e].icon} ${ELEMENTS[e].name.toUpperCase()}</span>`).join("")}</div>
     <div class="st"><span>HEALTH <b>${w.hp}</b></span><span>DAMAGE <b>${w.dmg}</b></span><span>SPEED <b>${SPEED_NUM[w.type]}</b></span></div>
     ${gmHTML(w)}
     ${w.armor ? `<div class="st"><span>ARMOUR <b>${w.armor}</b></span><span>GIANT</span></div>` : ""}
@@ -1359,6 +1365,8 @@ function teamRule(team, id) {   // returns why this warrior can't join the team,
     if (team.length >= 2) return "A giant only teams up with 1 other warrior. Take someone off first.";
   } else if (giants && team.length >= 2) return "A team with a giant only has room for 1 other warrior.";
   else if (team.length >= 3) return "Teams have up to 3 warriors.";
+  const total = teamPts(team) + ptsOf(id);
+  if (total > POINTS_CAP) return `Too strong! That team would be ${total} points and the limit is ${POINTS_CAP}.`;
   return "";
 }
 const teamCap = team => team.some(isG) ? 2 : 3;
@@ -1370,7 +1378,7 @@ function fixTeam() {   // makes sure a saved team follows the rules
 function teamScreen(onDone) {
   if (save) bump("bench");
   const draw = (note = "") => {
-    overlay(`<h2>Your team</h2><p class="sub">Tap up to 3 warriors, or 1 giant plus 1 other warrior. Number 1 fights first.</p>
+    overlay(`<h2>Your team</h2><p class="sub">Tap up to 3 warriors, or 1 giant plus 1 other warrior. Number 1 fights first.<br><b>Team points: ${teamPts(save.team)} / ${POINTS_CAP}</b> (every warrior has \u2605 4, 5 or 6 points, giants 9, 10 or 11).</p>
       <div class="topbar"><button class="btn" id="ok">Done</button></div>
       <p class="sub note">${note}</p>
       ${gmPanel()}
@@ -1385,6 +1393,7 @@ function teamScreen(onDone) {
         const others = save.team.filter(t => t !== id);
         if (others.some(isG)) note = "Only 1 giant per team. Switch the other giant off first.";
         else if (others.length > 1) note = "A giant only teams up with 1 other warrior. Take someone off the team first.";
+        else if (teamPts(others) + GM_PTS[id] > POINTS_CAP) note = `Giant ${BY_ID[id].name} is ${GM_PTS[id]} points. With your other warrior that is ${teamPts(others) + GM_PTS[id]}, and the limit is ${POINTS_CAP}.`;
         else { save.giantMode = save.giantMode || {}; save.giantMode[id] = true; }
       }
       persist(); const y = ov.scrollTop; draw(note); ov.scrollTop = y;
@@ -1463,13 +1472,14 @@ function cpuTeam(lv, size) {
   const allowed = lv < 3 ? ["common"] : lv < 6 ? ["common", "rare"] : lv < 9 ? ["common", "rare", "epic"] : ["common", "rare", "epic", "legendary"];
   const pool = WARRIORS.filter(w => allowed.includes(w.rarity) && !w.starter || lv < 1 && w.starter);
   const team = [];
-  while (team.length < size) { const w = pool[Math.floor(Math.random() * pool.length)]; if (!team.includes(w.id)) team.push(w.id); }
+  let tries = 0;
+  while (team.length < size) { const w = pool[Math.floor(Math.random() * pool.length)]; if (team.includes(w.id)) continue; if (team.reduce((n, id) => n + ptsBase(BY_ID[id]), 0) + ptsBase(w) + 4 * (size - team.length - 1) > POINTS_CAP && tries++ < 300) continue; team.push(w.id); }   // the computer follows the 15 point rule too (and leaves room for the rest of its team)
   return team;
 }
 // 2 players: each picks any warriors (free play, no coins).
 function twoPlayerPick(p1, who, p2 = [], note = "") {
   const mine = who === 1 ? p1 : p2;
-  overlay(`<h2>Player ${who}: pick up to 3</h2><p class="sub">Free play: every warrior you can buy is unlocked, plus any quest warriors and giants you've won. 1 giant max, and a giant only teams up with 1 other warrior.</p>
+  overlay(`<h2>Player ${who}: pick up to 3</h2><p class="sub">Free play: every warrior you can buy is unlocked, plus any quest warriors and giants you've won. 1 giant max, and a giant only teams up with 1 other warrior.<br><b>Team points: ${teamPts(mine)} / ${POINTS_CAP}</b></p>
     <div class="topbar"><div class="row"><button class="btn alt" id="back">Back</button><button class="btn" id="ok" ${mine.length ? "" : "disabled"}>${who === 1 ? "Player 2's turn" : "FIGHT!"}</button></div></div>
     <p class="sub note">${note}</p>
     ${pickSearchHTML()}
